@@ -1,0 +1,30 @@
+--SQL Query 1 - Exposure File
+
+SELECT
+a.di_device_uuid, a.di_impression_dtime, b.device_type
+FROM (
+SELECT
+di_device_uuid, di_impression_dtime 
+FROM TABLE_DATE_RANGE(m2m_detections.device_ibeacon_, TIMESTAMP('2018-05-30'), TIMESTAMP('2018-06-13'))
+WHERE 
+di_advertiser_ad_id IN (2814)
+and di_impression_dtime	is not null) a
+JOIN
+(select device_type, device_uuid from [rwr.device_type_lookup] ) b
+ON b.device_uuid=a.di_device_uuid
+GROUP BY
+a.di_device_uuid,
+a.di_impression_dtime,
+b.device_type;
+ 
+
+--SQL Query 2 - Public IP & Device ID Matching
+
+select a.public_ip as publicip 
+from 
+(select public_ip, device_uuid from device_data.device_ip where date >= '2018-04-01') a 
+join 
+(select v_di_device_uuid from Helen.Walmart_Parents_devices) b
+on a.device_uuid=b.v_di_device_uuid
+group by 1
+limit 20000;
